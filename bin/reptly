@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+import argparse
+import os
+import sys
+
+
+parent = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if os.path.isdir(os.path.join(parent, 'reptly')):
+    sys.path.insert(0, parent)
+
+
+from reptly.app import App
+from reptly.aptly import Aptly
+from reptly.ui import CronUI, PromptToolkitUi
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        prog='reply', description='''
+    Aptly is a very powerfol repository management tool.
+    Managing mirrors, repositories, snapshots and publications requires
+    multiple steps and many aptly calls.
+
+    %(prog)s is a small helper script that implements a few common operations
+    around repository management (primarily updating mirrors and repos,
+    snapshoting them, merging them if needed and publish the snapshot to
+    different destinations).
+
+    Its name is a combination of aptly and reprepro as its idological goal is
+    providing aptlys features with a reprepro like easy to use interface.
+    '''
+    )
+    parser.add_argument('--config', default='conf.dpd')
+    parser.add_argument(
+        '--cron', action='store_const', const=CronUI, default=PromptToolkitUi,
+        help='Produce only output on errors and changed packages'
+    )
+
+    actions = parser.add_subparsers(dest='action')
+    update = actions.add_parser('update')
+    update.add_argument(
+        'target', metavar='MIRROR/REPO', nargs='*',
+        help='name of mirror or repo to update'
+    )
+
+    publish = actions.add_parser('publish')
+    publish.add_argument(
+        'target', metavar='DEST', nargs='*',
+        help='name of publish targets to update'
+    )
+
+    run = actions.add_parser('run')
+    run.add_argument(
+        'target', metavar='DEST', nargs='+',
+        help='name of publish targets to update (with sources)'
+    )
+
+    args = parser.parse_args()
+
+    aptly = Aptly()
+    ui = args.cron()
+
+    app = App(aptly, ui)
+    with open(args.config, 'r') as conf:
+        app.load(conf)
+
+    if not args.action:
+        parser.error('Action required')
+
+    getattr(app, f'exec_{args.action}')(args)
+
+
+if __name__ == '__main__':
+    main()
