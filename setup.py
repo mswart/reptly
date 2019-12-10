@@ -58,7 +58,7 @@ setup(
     install_requires=[
         'prompt_toolkit',
         'pygments',
-        'yaml',
+        'PyYAML',
     ],
 
     scripts=['bin/reptly'],
