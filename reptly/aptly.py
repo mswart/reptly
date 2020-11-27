@@ -2,7 +2,7 @@
 import requests
 import subprocess
 
-from typing import List
+from typing import List, Optional
 
 
 class Aptly():
@@ -104,6 +104,7 @@ class Aptly():
                  check=True, **extra_args)
 
     def publish(self, distro: str, target: str, content: dict, *,
+                origin: Optional[str]=None,
                 architectures: List[str] = None,
                 acquire_by_hash: bool = True):
         args = ['publish', 'snapshot']
@@ -113,6 +114,8 @@ class Aptly():
         args.append('-distribution=' + distro),
         if acquire_by_hash:
             args.append('-acquire-by-hash')
+        if origin:
+            args.append(f'-origin={origin}')
         args.extend(list(content.values()))
         args.append(target)
 

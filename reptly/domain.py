@@ -254,6 +254,7 @@ class Publish():
         self.distribution = distribution
         self.architectures = []
         self.alias = config.pop('alias')
+        self.origin = config.pop('origin', None)
 
         if 'components' in config:
             assert 'component' not in config, \
@@ -313,7 +314,8 @@ class Publish():
             self.distribution, self.target,
             {c: s.current.name for c, s in self.components.items()},
             architectures=self.architectures,
-            acquire_by_hash=True
+            acquire_by_hash=True,
+            origin=self.origin,
         )
 
     def _publish_component(self, component, publishedSnapshot):
