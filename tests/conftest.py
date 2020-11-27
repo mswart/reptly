@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Optional
 import sys
 
 import pytest
@@ -80,9 +80,10 @@ class Testly():
         return self.run('mirror_update', name, quiet)
 
     def publish(self, distro: str, target: str, content: dict, *,
+                origin: Optional[str] = None,
                 architectures: List[str] = None,
                 acquire_by_hash: bool = True):
-        self.run('publish', target, distro, content, architectures,
+        self.run('publish', target, distro, origin, content, architectures,
                  acquire_by_hash)
 
     def switch(self, distro, target, snapshot):

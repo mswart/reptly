@@ -54,7 +54,7 @@ def test_update_all_referenced_mirrors_and_publish_initially(app, aptly):
     aptly.schedule('snapshot_info', 'sw3+r1', ret='Empty')
 
     aptly.schedule('snapshot_merge', 'comp-name+r1', True, 'sw2+r1', 'sw3+r1')
-    aptly.schedule('publish', 's3:apt:mon', 'distro',
+    aptly.schedule('publish', 's3:apt:mon', 'distro', None,
                    {'extra': 'comp-name+r1', 'main': 'sw1+r1'}, [], True)
 
     app.exec_run(Namespace(['publish-name']))

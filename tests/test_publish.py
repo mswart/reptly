@@ -46,7 +46,24 @@ def test_publish_single_newly_with_snapshots(app, aptly):
         component: main
         source: !mirror test''')
 
-    aptly.schedule('publish', 's3:apt:mon', 'distro', {'main': 'test+r1'},
+    aptly.schedule('publish', 's3:apt:mon', 'distro', None, {'main': 'test+r1'},
+                   [], True)
+
+    app.exec_publish(Namespace(['test-distro']))
+    assert aptly.pending_ops == []
+
+
+def test_publish_single_newly_with_origin(app, aptly):
+    aptly.register_mirror('test', snapshots=[1])
+    app.load('''publish:
+      - alias: 'test-distro'
+        destination: s3:apt:mon
+        distribution: distro
+        component: main
+        origin: cloud
+        source: !mirror test''')
+
+    aptly.schedule('publish', 's3:apt:mon', 'distro', 'cloud', {'main': 'test+r1'},
                    [], True)
 
     app.exec_publish(Namespace(['test-distro']))
@@ -83,7 +100,7 @@ def test_publish_fixed_snapshot_newly(app, aptly):
         component: main
         source: !snapshot extern-managed''')
 
-    aptly.schedule('publish', 's3:apt:mon', 'distro', {'main': 'extern-managed'},
+    aptly.schedule('publish', 's3:apt:mon', 'distro', None, {'main': 'extern-managed'},
                    [], True)
 
     app.exec_publish(Namespace(['test-distro']))
@@ -125,7 +142,7 @@ def test_publish_merge_newly(app, aptly):
           - !mirror software2
           - !repo test1''')
 
-    aptly.schedule('publish', 's3:apt:mon', 'distro',
+    aptly.schedule('publish', 's3:apt:mon', 'distro', None,
                    {'main': 'test-distro+r1'}, [], True)
 
     app.exec_publish(Namespace(['test-distro']))
@@ -441,7 +458,7 @@ def test_publish_components_initially(app, aptly):
           extra: !repo pkgs1''')
     app.ui.decide('switch', ('s3:apt:mon', 'distro', 'main'), False)
 
-    aptly.schedule('publish', 's3:apt:mon', 'distro', {
+    aptly.schedule('publish', 's3:apt:mon', 'distro', None, {
             'extra': 'pkgs1+r1',
             'main': 'test-distro-main+r1'
         }, [], True)
